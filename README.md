@@ -13,6 +13,13 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 return {
     "louis-neovim-plugins/switchboard",
     opts = {},
+    keys = {
+        {
+            "<leader>s",
+            "<cmd>Switchboard<CR>",
+            desc = "Switchboard",
+        },
+    },
 }
 ```
 
@@ -79,13 +86,6 @@ local switches = {
             function ()
                 vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
             end,
-        },
-    },
-    keys = {
-        {
-            "<leader>s",
-            "<cmd>Switchboard<CR>",
-            desc = "Switchboard",
         },
     },
 }
