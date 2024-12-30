@@ -376,6 +376,9 @@ function Switchboard:draw_window()
         true,
         win_opts
     )
+
+    vim.wo[self.win_id].scrolloff = 0
+    vim.wo[self.win_id].sidescrolloff = 0
 end
 
 
