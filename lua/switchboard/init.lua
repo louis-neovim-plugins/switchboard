@@ -84,7 +84,7 @@ end
 function Switchboard:merge_opts(opts)
     self.final_opts = vim.tbl_deep_extend("force", default_opts, opts)
 
-    for hl_group_name, def in pairs(opts.highlight_groups) do
+    for hl_group_name, def in pairs(opts.highlight_groups or {}) do
         self.final_opts.highlight_groups[hl_group_name] = def
     end
 end
