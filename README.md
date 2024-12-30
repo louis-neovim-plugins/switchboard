@@ -30,8 +30,6 @@ return {
 
 Here are the default options:
 ```lua
-local hl_groups = require("switchboard.types").highlight_groups
-
 ---@type SwitchboardOpts
 local default_opts = {
     window = {
@@ -51,11 +49,11 @@ local default_opts = {
         separator = "",
     },
     highlight_groups = {
-        [hl_groups.SwitchboardKeymapLhs] = { link = "WhichKey"           },
-        [hl_groups.SwitchboardSeparator] = { link = "WhichKeySeparator"  },
-        [hl_groups.SwitchboardIconOn   ] = { link = "WhichKeyIconGreen"  },
-        [hl_groups.SwitchboardIconOff  ] = { link = "WhichKeyIconOrange" },
-        [hl_groups.SwitchboardLabel    ] = { link = "WhichKeyDesc"       },
+        SwitchboardKeymapLhs = { link = "WhichKey"           },
+        SwitchboardSeparator = { link = "WhichKeySeparator"  },
+        SwitchboardIconOn    = { link = "WhichKeyIconGreen"  },
+        SwitchboardIconOff   = { link = "WhichKeyIconOrange" },
+        SwitchboardLabel     = { link = "WhichKeyDesc"       },
     },
     switches = {},
 }
@@ -64,11 +62,11 @@ local default_opts = {
 > [!WARNING]
 > The highlight groups are linked to the [which-key.nvim](https://github.com/folke/which-key.nvim)
 > highlight groups by default. If you do not use which-key, you should define
-> your own colors or links.
+> your own colors or links. See the "more complex" example below.
 
 ---
 
-You need to provide your `switches` like so:
+You need to provide your `switches` like so (replace the `switches` above):
 ```lua
 ---@type SwitchboardSwitch[]
 local switches = {
@@ -93,6 +91,60 @@ local switches = {
 }
 ```
 
+More complex example:
+```lua
+---@type SwitchboardSwitch
+local color_preview_switch = {
+    label = "Color preview",
+    is_on = function ()
+        return require("nvim-highlight-colors").is_active()
+    end,
+    keymap = {
+        "c",
+        function () require("nvim-highlight-colors").toggle() end,
+    },
+}
+
+
+---@param _ any
+---@param opts SwitchboardOpts
+local function make_config(_, opts)
+    local builtins = require("switchboard.builtins")
+    local hl_group = require("switchboard.types").swichboard_hl_group
+
+    opts.switches = {
+        color_preview_switch,
+        builtins.switches.make_diagnostics_switch("d"),
+        builtins.switches.make_inlay_hints_switch("h"),
+        builtins.switches.make_relative_line_numbers_switch("r"),
+        builtins.switches.make_line_wrap_switch("w"),
+    }
+
+    opts.highlight_groups = {
+        [hl_group.SwitchboardKeymapLhs] = { fg = "red"    },
+        [hl_group.SwitchboardSeparator] = { fg = "blue"   },
+        [hl_group.SwitchboardIconOn   ] = { fg = "green"  },
+        [hl_group.SwitchboardIconOff  ] = { fg = "orange" },
+        [hl_group.SwitchboardLabel    ] = { fg = "cyan"   },
+    }
+
+    require("switchboard").setup(opts)
+end
+
+
+return {
+    "louis-neovim-plugins/switchboard",
+    config = make_config,
+    keys = {
+        {
+            "<leader>s",
+            "<cmd>Switchboard<CR>",
+            desc = "Switchboard",
+        },
+    },
+}
+```
+
 
 ## FAQ
 
@@ -103,8 +155,9 @@ A: No.
 ## Similar plugins
 
 This plugin is my attempt at reproducting [Snacks.toggle](https://github.com/folke/snacks.nvim/blob/main/docs/toggle.md),
-I wasn't happy about the documentation, couldn't make it work, the customization options seemed very limited, and the code is unreadable to me.
-A week-end later and voilà, "we have Toggle at home".
+I wasn't happy about the documentation, couldn't make it work, the customization
+options seemed very limited, and the code is unreadable to me. A week-end later
+and voilà, "we have Toggle at home".
 
 
 ## TODOs
