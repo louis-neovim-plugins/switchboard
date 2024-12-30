@@ -64,7 +64,7 @@ end
 ---@param opts SwitchboardOpts
 ---@return Switchboard
 function Switchboard:setup(opts)
-    self.final_opts = vim.tbl_deep_extend("force", default_opts, opts)
+    self:merge_opts(opts)
     self:create_hl_groups()
     self:create_commands()
 
@@ -76,6 +76,17 @@ function Switchboard:setup(opts)
     self.ns_id = vim.api.nvim_create_namespace("Switchboard")
 
     return self
+end
+
+---Correctly merges the user defined options with the default ones.
+---
+---@param opts SwitchboardOpts
+function Switchboard:merge_opts(opts)
+    self.final_opts = vim.tbl_deep_extend("force", default_opts, opts)
+
+    for hl_group_name, def in pairs(opts.highlight_groups) do
+        self.final_opts.highlight_groups[hl_group_name] = def
+    end
 end
 
 
