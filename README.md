@@ -100,6 +100,13 @@ Q: Can Switchboard handle other positions than "on" or "off"?
 A: No.
 
 
+## Similar plugins
+
+This plugin is my attempt at reproducting [Snacks.toggle](https://github.com/folke/snacks.nvim/blob/main/docs/toggle.md),
+I wasn't happy about the documentation, couldn't make it work, the customization options seemed very limited, and the code is unreadable to me.
+A week-end later and voilà, "we have Toggle at home".
+
+
 ## TODOs
 
 - [ ] Figure out what to do with the cursor. It'd be nice if it stayed in place
