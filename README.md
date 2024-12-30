@@ -5,6 +5,8 @@ plugin allows you to group all of these "switches" in one place and provides a
 neat little "switchboard" listing all switch positions and their associated
 keymaps.
 
+![Screenshot](https://github.com/user-attachments/assets/ba05592e-7285-4e06-ae93-04d9652960f1)
+
 
 ## Installation
 
