@@ -164,7 +164,7 @@ function Switchboard:create_keymaps()
     -- Disable undesirable keys.
     local keys_to_be_disabled = { "i", "I", "a", "A", "r", "R", "v", "V", "" }
     for _, key in pairs(keys_to_be_disabled) do
-        vim.keymap.set("n", key, function() end, { buffer = self.bufnr })
+        vim.keymap.set("n", key, "<nop>", { buffer = self.bufnr })
     end
 
     -- Set q to close the window.
@@ -264,6 +264,7 @@ function Switchboard:create_buffer()
 
         self.final_window_width = math.max(
             self.final_window_width,
+            -- This is not accurate as some symbols can take multiple cells.
             string.len(line)
         )
 
@@ -381,8 +382,8 @@ end
 ---Creates a new window to display the current buffer.
 ---
 function Switchboard:draw_window()
-    --Calculate where the bottom of the window should be, this is to avoid
-    --covering the statusline and command line.
+    -- Calculate where the bottom of the window should be, this is to avoid
+    -- covering the statusline and command line.
     local editor_height = vim.o.lines
     local cmdline_height = vim.o.cmdheight
     local statusline_height = vim.o.statusline and 1 or 0
@@ -394,7 +395,6 @@ function Switchboard:draw_window()
         {
             relative = "editor",
             anchor = "SE",
-            zindex = 220,
 
             -- Position.
             row = bottom_position,
@@ -404,16 +404,10 @@ function Switchboard:draw_window()
             -- Size.
             width = self.final_window_width,
             height = self.final_window_height,
-
-            -- Nvim doesn't like additional keys, it will have none of your shit.
-            -- This doesn't work.
-            -- min_width = nil,
-            -- min_height = nil,
         }
     )
 
     -- Nvim doesn't like additional keys, it will have none of your shit.
-    -- This works.
     win_opts.min_height = nil
     win_opts.min_width = nil
 
