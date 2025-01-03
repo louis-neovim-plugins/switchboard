@@ -1,6 +1,45 @@
 local hl_groups = require("switchboard.types").swichboard_hl_group
 
 
+---@type integer
+local original_cursor_blend = 0
+
+---@type boolean
+local original_smear_enabled = false
+
+---Hides the cursor.
+---
+local function hide_cursor()
+    -- Disable smear_cursor as the smear / trail to the window is not exactly
+    -- visually pleasing.
+    local ok, smear = pcall(require, "smear_cursor")
+    if ok then
+        original_smear_enabled = smear.enabled
+        smear.enabled = false
+    end
+
+    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
+    original_cursor_blend = hl.blend or 0
+    hl.blend = 100
+    ---@diagnostic disable-next-line
+    vim.api.nvim_set_hl(0, "Cursor", hl)
+end
+
+
+---Shows the cursor again. Basically undoes everything the hide_cursor()
+---function does.
+---
+local function show_cursor()
+    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
+    hl.blend = original_cursor_blend
+    ---@diagnostic disable-next-line
+    vim.api.nvim_set_hl(0, "Cursor", hl)
+
+    local ok, smear = pcall(require, "smear_cursor")
+    if ok then smear.enabled = original_smear_enabled end
+end
+
+
 local commands_set = false
 local hl_groups_set = false
 
@@ -96,7 +135,12 @@ function Switchboard:create_autocmds()
     vim.api.nvim_create_autocmd("WinLeave", {
         callback = function ()
             vim.api.nvim_win_hide(self.win_id)
+            show_cursor()
         end,
+        buffer = self.bufnr,
+    })
+    vim.api.nvim_create_autocmd("WinEnter", {
+        callback = hide_cursor,
         buffer = self.bufnr,
     })
 end
@@ -328,6 +372,9 @@ function Switchboard:update()
     self:draw_window()
     self:create_keymaps()
     self:create_autocmds()
+
+    -- We need to enter the window after we set the autocommands.
+    vim.api.nvim_set_current_win(self.win_id)
 end
 
 
@@ -373,7 +420,7 @@ function Switchboard:draw_window()
 
     self.win_id = vim.api.nvim_open_win(
         self.bufnr,
-        true,
+        false,
         win_opts
     )
 
