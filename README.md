@@ -5,7 +5,7 @@ plugin allows you to group all of these "switches" in one place and provides a
 neat little "switchboard" listing all switch positions and their associated
 keymaps.
 
-![Screenshot](https://github.com/user-attachments/assets/ba05592e-7285-4e06-ae93-04d9652960f1)
+![Screenshot](https://github.com/user-attachments/assets/5e387d33-6a7b-48ed-be05-a88e7eac0028)
 
 
 ## Installation
@@ -109,15 +109,18 @@ local color_preview_switch = {
 ---@param _ any
 ---@param opts SwitchboardOpts
 local function make_config(_, opts)
-    local builtins = require("switchboard.builtins")
+    local switches = require("switchboard.builtins").switches
     local hl_group = require("switchboard.types").swichboard_hl_group
 
     opts.switches = {
         color_preview_switch,
-        builtins.switches.make_diagnostics_switch("d"),
-        builtins.switches.make_inlay_hints_switch("h"),
-        builtins.switches.make_relative_line_numbers_switch("r"),
-        builtins.switches.make_line_wrap_switch("w"),
+        -- Convenience function to quickly make switches with the given
+        -- keymap lhs, and an optional label. You can easily overwrite
+        -- the returned table on top of that.
+        switches.make_diagnostics_switch("d"),
+        switches.make_inlay_hints_switch("h"),
+        switches.make_relative_line_numbers_switch("r"),
+        switches.make_line_wrap_switch("w"),
     }
 
     opts.highlight_groups = {
@@ -151,6 +154,9 @@ return {
 Q: Can Switchboard handle other positions than "on" or "off"?  
 A: No.
 
+Q: Does it integrate with Which-key?  
+A: No. Besides reusing the Which-key Highlight groups, there are no interactions between the two plugins.
+
 
 ## Similar plugins
 
@@ -162,7 +168,6 @@ and voilà, "we have Toggle at home".
 
 ## TODOs
 
-- [ ] Figure out what to do with the cursor. It'd be nice if it stayed in place
-      when we open the window.
-- [ ] Scrolling?
+- [ ] Which-key like global keymaps, and don't focus the window.
+- [ ] A footer with the "quit" keymap indicator.
 
