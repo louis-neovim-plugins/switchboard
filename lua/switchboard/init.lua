@@ -170,13 +170,16 @@ function Switchboard:create_keymaps()
         vim.keymap.set("n", key, "<nop>", { buffer = self.bufnr })
     end
 
-    -- Set q to close the window.
-    vim.keymap.set(
-        "n",
-        "q",
-        function () vim.api.nvim_win_hide(self.win_id) end,
-        { buffer = self.bufnr }
-    )
+    -- Keymaps to quit the window.
+    local escape_lhs_list = { "q", "<C-[>", "<Esc>" }
+    for _, lhs in pairs(escape_lhs_list) do
+        vim.keymap.set(
+            "n",
+            lhs,
+            function () vim.api.nvim_win_hide(self.win_id) end,
+            { buffer = self.bufnr }
+        )
+    end
 
     -- Define the mappings for the switches.
     for _, switch in pairs(self.final_opts.switches) do
