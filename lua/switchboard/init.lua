@@ -10,39 +10,6 @@ local original_cursor_blend = 0
 ---@type boolean
 local original_smear_enabled = false
 
----Hides the cursor.
----
-local function hide_cursor()
-    -- Disable smear_cursor as the smear / trail to the window is not exactly
-    -- visually pleasing.
-    local ok, smear = pcall(require, "smear_cursor")
-    if ok then
-        original_smear_enabled = smear.enabled
-        smear.enabled = false
-    end
-
-    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
-    original_cursor_blend = hl.blend or 0
-    hl.blend = 100
-    ---@diagnostic disable-next-line
-    vim.api.nvim_set_hl(0, "Cursor", hl)
-end
-
-
----Shows the cursor again. Basically undoes everything the hide_cursor()
----function does.
----
-local function show_cursor()
-    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
-    hl.blend = original_cursor_blend
-    ---@diagnostic disable-next-line
-    vim.api.nvim_set_hl(0, "Cursor", hl)
-
-    local ok, smear = pcall(require, "smear_cursor")
-    if ok then smear.enabled = original_smear_enabled end
-end
-
-
 local commands_set = false
 local hl_groups_set = false
 
@@ -86,7 +53,9 @@ local default_opts = {
 ---@field private final_window_width integer
 ---@field private final_window_height integer
 ---@field private ns_id integer
----@field private previous_win_id integer
+---@field private previous_win_id integer Winid of the window we triggered Switchboard from.
+---@field private previous_bufnr integer Bufnr of the buffer we triggered Switchboard from.
+---@field private is_visible boolean Wether the Switchboard panel is visible or not.
 local Switchboard = {}
 
 
@@ -98,6 +67,43 @@ function Switchboard:new()
     self.__index = self
 
     return new_object
+end
+
+
+---Hides the cursor.
+---
+function Switchboard:hide_cursor()
+    -- We don't need to hide again if we are just refreshing the board.
+    -- And we avoid overwriting the cache with invalid values.
+    if self.is_visible then return end
+
+    -- Disable smear_cursor as the smear / trail to the window is not exactly
+    -- visually pleasing.
+    local ok, smear = pcall(require, "smear_cursor")
+    if ok then
+        original_smear_enabled = smear.enabled
+        smear.enabled = false
+    end
+
+    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
+    original_cursor_blend = hl.blend or 0
+    hl.blend = 100
+    ---@diagnostic disable-next-line
+    vim.api.nvim_set_hl(0, "Cursor", hl)
+end
+
+
+---Shows the cursor again. Basically undoes everything the hide_cursor()
+---function does.
+---
+function Switchboard:show_cursor()
+    local hl = vim.api.nvim_get_hl(0, { name = "Cursor" })
+    hl.blend = original_cursor_blend
+    ---@diagnostic disable-next-line
+    vim.api.nvim_set_hl(0, "Cursor", hl)
+
+    local ok, smear = pcall(require, "smear_cursor")
+    if ok then smear.enabled = original_smear_enabled end
 end
 
 
@@ -135,15 +141,21 @@ end
 ---Creates autocommands for the Switchboard window.
 ---
 function Switchboard:create_autocmds()
+    -- Note: It looks like the event is not triggering when we replace the
+    -- window and buffer.
     vim.api.nvim_create_autocmd("WinLeave", {
         callback = function ()
             vim.api.nvim_win_hide(self.win_id)
-            show_cursor()
+            self:show_cursor()
+            self.is_visible = false
         end,
         buffer = self.bufnr,
     })
     vim.api.nvim_create_autocmd("WinEnter", {
-        callback = hide_cursor,
+        callback = function()
+            self:hide_cursor()
+            self.is_visible = true
+        end,
         buffer = self.bufnr,
     })
 end
@@ -374,7 +386,11 @@ function Switchboard:update()
     end
     if self.bufnr then vim.api.nvim_buf_delete(self.bufnr, {}) end
 
-    self.previous_win_id = vim.api.nvim_get_current_win()
+    local previous_bufnr = vim.api.nvim_get_current_buf()
+    if vim.bo[previous_bufnr].filetype ~= switchboard_filetype then
+        self.previous_bufnr = previous_bufnr
+        self.previous_win_id = vim.api.nvim_get_current_win()
+    end
 
     self:create_buffer()
     self:draw_window()
