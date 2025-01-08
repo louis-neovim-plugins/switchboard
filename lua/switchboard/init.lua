@@ -1,6 +1,9 @@
 local hl_groups = require("switchboard.types").swichboard_hl_group
 
 
+local switchboard_filetype = "switchboard"
+
+
 ---@type integer
 local original_cursor_blend = 0
 
@@ -282,6 +285,7 @@ function Switchboard:create_buffer()
     vim.bo[self.bufnr].modifiable = false
     vim.bo[self.bufnr].swapfile = false
     vim.bo[self.bufnr].buftype = "nofile"
+    vim.bo[self.bufnr].filetype = switchboard_filetype
 
     self:highlight_buffer(all_lines_elements)
 end
