@@ -1,17 +1,10 @@
+local switches = {}
 
----@class SwitchboardBuiltins
----@field switches SwitchboardBuiltinSwitches
-local M = { switches = {} }
 
----@alias SwitchboardSwitchGenerator fun(lhs: string, label?: string): SwitchboardSwitch
-
----@class SwitchboardBuiltinSwitches
----@field make_inlay_hints_switch SwitchboardSwitchGenerator
----@field make_diagnostics_switch SwitchboardSwitchGenerator
----@field make_relative_line_numbers_switch SwitchboardSwitchGenerator
----@field make_line_wrap_switch SwitchboardSwitchGenerator
-
-function M.switches.make_inlay_hints_switch(lhs, label)
+---Generate a switch to toggle the inlay hints configuration on / off.
+---
+---@type SwitchboardSwitchGenerator
+function switches.make_inlay_hints_switch(lhs, label)
     return {
         label = label or "Inlay hints",
         is_on = function () return vim.lsp.inlay_hint.is_enabled() end,
@@ -24,7 +17,11 @@ function M.switches.make_inlay_hints_switch(lhs, label)
     }
 end
 
-function M.switches.make_diagnostics_switch(lhs, label)
+
+---Generate a switch to toggle the diagnostics on / off.
+---
+---@type SwitchboardSwitchGenerator
+function switches.make_diagnostics_switch(lhs, label)
     return {
         label = label or "Diagnostics",
         is_on = function () return vim.diagnostic.is_enabled() end,
@@ -35,7 +32,12 @@ function M.switches.make_diagnostics_switch(lhs, label)
     }
 end
 
-function M.switches.make_relative_line_numbers_switch(lhs, label)
+
+---Generate a switch to toggle the 'relativenumber' option between absolute and
+---relative.
+---
+---@type SwitchboardSwitchGenerator
+function switches.make_relative_line_numbers_switch(lhs, label)
     return {
         label = label or "Relative line numbers",
         is_on = function () return vim.o.relativenumber end,
@@ -46,7 +48,11 @@ function M.switches.make_relative_line_numbers_switch(lhs, label)
     }
 end
 
-function M.switches.make_line_wrap_switch(lhs, label)
+
+---Generate a switch to toggle the 'wo.wrap' option between on / off.
+---
+---@type SwitchboardSwitchGenerator
+function switches.make_line_wrap_switch(lhs, label)
     return {
         label = label or "Line wrap",
         is_on = function () return vim.wo.wrap end,
@@ -57,6 +63,11 @@ function M.switches.make_line_wrap_switch(lhs, label)
     }
 end
 
+
+---@type SwitchboardBuiltins
+local M = {
+    switches = switches
+}
 
 return M
 
