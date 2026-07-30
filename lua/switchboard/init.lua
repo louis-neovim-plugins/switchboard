@@ -70,7 +70,7 @@ end
 ---@param opts UserSwitchboardOpts
 function Switchboard.setup(opts)
     Switchboard.final_opts = vim.tbl_deep_extend("force", default_opts, opts)
-    Switchboard.create_hl_groups()
+    -- Switchboard.create_hl_groups()
     Switchboard.create_commands()
 
     Switchboard.final_window_width = Switchboard.final_opts.window.min_width or 0
@@ -109,6 +109,8 @@ end
 function Switchboard.create_hl_groups()
     if hl_groups_set then return end
     hl_groups_set = true
+
+    print('create hl groups')
 
     for group_name, def in pairs(Switchboard.final_opts.highlight_groups) do
         vim.api.nvim_set_hl(0, group_name, def)
@@ -277,7 +279,7 @@ function Switchboard.highlight_buffer(all_lines_elements)
 end
 
 
----Wraps a keymap rhs command / function to atche errors and update the UI
+---Wraps a keymap rhs command / function to catch errors and update the UI
 ---when it has completed its job.
 ---
 ---@param switch SwitchboardSwitch
@@ -320,6 +322,10 @@ function Switchboard.update()
     -- Warn when the switchboard is opened from a 'nofile' buffer.
     if vim.api.nvim_get_option_value("buftype", {}) == "nofile" then
         local ft = vim.api.nvim_get_option_value("filetype", {})
+        if(ft == constants.filetype) {
+
+        }
+
         vim.notify(
             "Filetype is " .. ft .. ", in a 'nofile' buffer.",
             vim.log.levels.WARN,
@@ -341,8 +347,9 @@ function Switchboard.update()
 
     Switchboard.create_buffer()
     Switchboard.draw_window()
-    Switchboard.create_keymaps()
-    Switchboard.create_autocmds()
+    -- Done in ftplugin now.
+    -- Switchboard.create_keymaps()
+    -- Switchboard.create_autocmds()
 
     -- We need to enter the window after we set the autocommands.
     vim.api.nvim_set_current_win(Switchboard.win_id)
@@ -388,8 +395,31 @@ function Switchboard.draw_window()
         win_opts
     )
 
-    vim.wo[Switchboard.win_id].scrolloff = 0
-    vim.wo[Switchboard.win_id].sidescrolloff = 0
+    -- vim.wo[Switchboard.win_id].scrolloff = 0
+    -- vim.wo[Switchboard.win_id].sidescrolloff = 0
+end
+
+
+function Switchboard.close()
+    vim.api.nvim_win_hide(Switchboard.win_id)
+end
+
+
+function Switchboard.open()
+    vim.api.nvim_win_hide(Switchboard.win_id)
+end
+
+
+function Switchboard.toggle()
+    if  then
+    else
+        vim.api.nvim_win_hide(Switchboard.win_id)
+    end
+end
+
+
+function is_open()
+
 end
 
 
